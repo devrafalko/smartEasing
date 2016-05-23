@@ -1,0 +1,68 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+	<title>Easing Curves Creator</title>
+
+	<link rel="stylesheet" type="text/css" href="../styles/main.css"/>
+	<link rel="Shortcut icon" href="../media/sE.png" />
+	<script src="../easingModes.js"></script>
+	<script src="../smEasing.js"></script>
+	<script src="../js/main.js"></script>
+
+</head>
+
+<body>
+	<div>
+		<div class="backPanel"></div>
+		<div class="backPanel"></div>
+	</div>
+	<div class="control" id="contrPanel">
+		<div class="controlIn">
+				<div class="miniPanel">
+					<div><span class="title">Time</span><input type="range" class="range" value="0.5" min="0" max="3" step="0.05" id="timeRange" oninput="setTime()" /><input class="output" readonly="readonly"/></div>
+					<div><span class="title">Duration</span><input type="range" class="range" value="0.2" min="0" max="1" step="0.01" id="durationValue" /><input class="output" readonly="readonly"/></div>
+				</div>
+				<div class="miniPanel">
+					<div>
+						<span class="title">Mode</span><select id="easingMode"></select>
+						<div id="switchXY" class="switchY">
+							<div>
+								<div><span>X</span></div>
+								<div><span>XY</span></div>
+								<div></div>
+							</div>
+						</div>
+					</div>
+					<div>
+						<span class="title">Points</span><select id="numOfPoints"></select>	
+						<input type="button" value="Reset" id="resetSample"/>
+						<input type="button" value="Start" id="easeSample"/>
+					</div>
+				</div>
+		</div>
+	</div>
+
+	<div class="mainCont">
+		<div style="position:relative">
+			<input type="text" id="outputCoords" readonly="readonly" onclick="cC(0,this)" onmouseover="cC(1)" onmouseout="cC(2)"/>
+			<p id="outputStatus">Array copied to clipboard</p>
+		</div>
+			<canvas id="drawBezier" width="500" height="840"></canvas>
+	</div>
+	<div class="mainCont" style="width:40%">
+		<div id="samp1"></div>
+		<div id="samp2"></div>
+		<span id="samp3">Hello world!</span>
+		<span id="samp4">Hello world!</span>
+		<div class="lCont" style="width:30%">
+			<div id="samp5"></div>
+		</div>
+		<div class="lCont" style="width:60%">
+			<div id="samp6"></div>
+		</div>
+	</div>
+	
+	
+</body>
+</html>

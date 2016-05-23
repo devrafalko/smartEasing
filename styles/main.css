@@ -1,0 +1,315 @@
+@import url(https://fonts.googleapis.com/css?family=Poiret+One);
+
+/*
+*::selection {
+	background-color:transparent;
+}
+*/
+
+/* FORMATOWANIE LAYOUTU*/
+
+
+.vertical_div>*::selection {
+	background-color:transparent;
+}
+
+body {
+	margin:0;
+	padding:0;
+	width:100%;
+	font-family:caviar;
+	font-size:18px;
+	color:#ffffff;
+	text-align:center;
+	background: #0F426F;
+	background: -webkit-linear-gradient(left, #0F426F , #3C8A96, #505960);
+	background: -o-linear-gradient(right, #0F426F, #3C8A96, #505960);
+	background: -moz-linear-gradient(right, #0F426F, #3C8A96, #505960);
+	background: linear-gradient(to top, #0F426F, transparent),linear-gradient(to right, #0F426F, #25849A, #3C8A96, #505960);
+}
+
+.control{
+	text-align:center;
+	position:fixed;
+	z-index:2;
+	top:0px;
+	left:0px;
+	width:100%;
+	background: linear-gradient(to right, #0F426F, #25849A, #3C8A96, #505960);
+}
+
+.controlIn{
+	background-color:rgba(255,255,255,.3);
+}
+
+
+.miniPanel{
+	margin:0 3px;
+	display:inline-block;
+	line-height:40px;
+	vertical-align:top;
+}
+
+.miniPanel>div{
+	text-align:left;
+	box-sizing:border-box;
+	width:525px;
+	padding:5px;
+}
+
+.backPanel{
+	box-sizing:border-box;
+	padding:12px 5px;
+	display:inline-block;
+	vertical-align:top;
+	width:525px;
+	height:105px;
+	margin:0 3px;
+}
+
+.title{
+	display:inline-block;
+	padding:0 10px;
+	text-align:right;
+	font-family: 'Poiret One', cursive;
+	font-size:22px;
+	width:80px;
+}
+
+.range{
+	width:275px;
+	cursor:pointer;
+	
+}
+
+.output{
+	font-family: 'Poiret One', cursive;
+	font-size:22px;
+	padding:5px;
+	color:#ffffff;
+	background-color:rgba(255,255,255,.3);
+	border:none;
+	outline:none;
+	width:100px;
+	text-align:center;
+	border-radius:4px;
+	margin:0 10px;
+}
+
+#drawBezier{
+	background-color:rgba(255,255,255,0);
+}
+
+#easingMode,#numOfPoints {
+	width:200px;
+	font-family: 'Poiret One', cursive;
+	font-size:22px;
+	padding:5px;
+	color:#ffffff;
+	background-color:rgba(255,255,255,.3);
+	border:none;
+	outline:none;
+	text-align:center;
+	border-radius:4px;
+	margin:0 10px;
+	box-shadow:0px 0px 5px 3px rgba(255,255,255,.12), 0px 0px 0px rgba(255,255,255,.3) inset;
+	transition: box-shadow .2s ease-in-out;	
+}
+
+#switchXY{
+	display:inline-block;
+	width:100px;
+	height:40px;
+	font-family: 'Poiret One', cursive;
+	font-size:22px;
+	color:#ffffff;
+	background-color:rgba(255,255,255,.3);
+	border:none;
+	outline:none;
+	border-radius:.5em;
+	vertical-align: top;
+	margin:0 10px;
+	position:relative;
+	overflow:hidden;
+	cursor:pointer;
+	box-shadow:-2px -1px 6px 2px rgba(88,126,156,.7) inset;
+}
+
+#switchXY>div{
+	position:absolute;
+	top:0px;
+	height:100%;
+	width:150%;
+	text-align: center;
+	text-align:center;
+	transition: left .3s ease-in-out;
+}
+
+.switchX>div{
+	left:0%;
+}
+.switchY>div{
+	left:-50%;
+}
+
+#switchXY>div>div{
+	height:100%;
+	width:50%;
+}
+
+#switchXY>div>div:first-child{
+	position:absolute;
+	top:0px;
+	left:0px;
+}
+#switchXY>div>div:first-child>span{
+	padding-right:20px;
+}
+
+#switchXY>div>div:nth-child(2){
+	position:absolute;
+	top:0px;
+	left:50%;
+}
+#switchXY>div>div:nth-child(2)>span{
+	padding-left:20px;
+}
+#switchXY>div>div:last-child{
+	position:relative;
+	width:50px;
+	margin:auto;
+	background-color:rgb(100,162,181);
+	background: linear-gradient(rgba(153,196,205,.5),rgba(100,162,181,1));
+	box-shadow: 2px 2px 10px 2px rgba(92,139,165,1) inset;
+	border-radius:.5em;
+	transition:background-color .4s ease-in-out;
+}
+
+#switchXY>div>div:last-child:hover{
+	background-color:#D0EDF5;
+}
+
+#numOfPoints{
+	width:75px;
+}
+
+option{
+	background: #3C8A96;
+	color:#ffffff;
+	font-size:.8em;
+}
+
+#easeSample,#resetSample{
+	font-family: 'Poiret One', cursive;
+	font-size:22px;
+	padding:5px;
+	color:#ffffff;
+	background-color:rgba(255,255,255,.3);
+	border:none;
+	outline:none;
+	width:100px;
+	text-align:center;
+	border-radius:4px;
+	margin:0 10px;
+	cursor:pointer;
+	box-shadow:0px 0px 5px 3px rgba(255,255,255,.12), 0px 0px 0px rgba(255,255,255,.3) inset;
+	transition: box-shadow .2s ease-in-out;
+}
+
+#easeSample:hover,#easingMode:hover,#numOfPoints:hover,#resetSample:hover{
+	box-shadow:0px 0px 3px rgba(255,255,255,.3), 0px 0px 10px 1px rgba(255,255,255,.7) inset;
+}
+
+.mainCont{
+	display:inline-block;
+	vertical-align:top;
+	box-sizing: border-box;
+	min-width:525px;
+	padding:5px;
+	margin:10px 3px;
+	box-shadow:1px 1px 10px 0px rgba(255,255,255,.2);
+	font-family: 'Poiret One', cursive;
+	font-size:22px;
+	color:#ffffff;
+}
+
+#samp1, #samp2, #samp5, #samp6{
+	width:100px;
+	height:100px;
+	background-color:rgba(255,255,255,1);
+	box-shadow:5px 5px 7px rgba(255,255,255,.3);
+	margin:20px 10px;
+	position:relative;
+	top:0px;
+	left:0px;
+}
+
+#samp5{
+	display:inline-block;
+	height:40px;
+	margin:0;
+	vertical-align: top;
+}
+
+#samp6{
+	display:inline-block;
+	margin:0;
+	vertical-align: middle;
+	width:200px;
+	height:80px;
+	background: linear-gradient(to top, rgb(33,105,134), rgb(51,138,163));
+
+}
+
+#samp3, #samp4{
+	display:block;
+	margin:20px 10px;
+	padding:5px;
+	color:#ffffff;
+	letter-spacing: 0px;
+}
+
+#outputCoords{
+	font-family: inherit;
+	font-size:inherit;
+	color:inherit;
+	background-color:transparent;
+	border:none;
+	outline:none;
+	width:100%;
+	height:1em;
+	padding:.2em 0;
+	overflow:hidden;
+	white-space:nowrap;
+	text-overflow:ellipsis;
+	text-align:center;
+	cursor:pointer;
+}
+
+#outputStatus{
+	position:absolute;
+	text-align: center;
+	margin:0px;
+	font-size:20px;
+	color:rgba(255,255,255,0);
+	padding:3px 20px;
+	z-index: -1;
+	transition:color .4s ease-in-out;
+	
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;	
+	
+	
+}
+
+.lCont{
+	display:inline-block;
+	box-sizing:border-box;
+	height:10em;
+	line-height:10;
+}
+

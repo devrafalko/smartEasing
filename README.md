@@ -1,1 +1,1 @@
-# smartEasing
+# valueEasing
