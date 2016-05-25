@@ -44,12 +44,13 @@
 	</div>
 
 	<div class="mainCont">
-		<div style="position:relative">
+		<div>
 			<input type="text" id="outputCoords" readonly="readonly" onclick="cC(0,this)" onmouseover="cC(1)" onmouseout="cC(2)"/>
 			<p id="outputStatus">Array copied to clipboard</p>
 		</div>
-			<canvas id="drawBezier" width="500" height="840"></canvas>
+		<div id="canvaContainer"></div>
 	</div>
+		
 	<div class="mainCont" style="width:40%">
 		<div id="samp1"></div>
 		<div id="samp2"></div>
@@ -63,6 +64,7 @@
 		</div>
 	</div>
 	
+	<div id="nowyKont"></div>
 	
 </body>
 </html>

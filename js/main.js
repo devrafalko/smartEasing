@@ -322,6 +322,7 @@ function easeSamples(){
 }
 
 window.onload = function(){
+	createLayers("canvaContainer",5,500,840);
 	setListeners(true);
 	setEasingOptions();
 	setPointsOptions(16);
@@ -331,8 +332,29 @@ window.onload = function(){
 	canvaEvents(0,1);
 };
 
+function createLayers(contId,numOfLayers,width,height){
+	var container = document.getElementById(contId);
+	container.style.position="relative";
+	container.style.zIndex="0";
+	container.style.width = width + "px";
+	container.style.height = height + "px";
+	for(var i=0;i<numOfLayers;i++){
+		var newCanva = document.createElement("CANVAS");
+		newCanva.setAttribute("width",width);
+		newCanva.setAttribute("height",height);
+		newCanva.setAttribute("class","layer"+(i+1));
+		newCanva.style.zIndex=(i+1).toString();
+		newCanva.style.position = "absolute";
+		newCanva.style.top = "0px";
+		newCanva.style.left = "0px";
+		
+		container.appendChild(newCanva);
+	}
+}
+
 function canvaEvents(getE,state){		//	0: move		1: click	2: release
-	var canva = document.getElementById("drawBezier");
+	var canva = document.getElementById("canvaContainer");
+	
 	var fE = ["mousemove","mousedown","mouseup"];
 	var fF = [moveMe,clickMe,releaseMe];
 	var whichEvent = Object.getOwnPropertyNames(firingOnce)[getE];
@@ -356,12 +378,15 @@ function moveMe(){
 		firingOnce.pointToMove = null;
 	}
 	
-	var canva = document.getElementById("drawBezier");
+	var canva = document.getElementById("canvaContainer");
+	var layer = canva.children;	
+	
 	var sel = document.getElementById("easingMode");
+	
 	var margin = 20;
 	var cX = (event.clientX+document.body.scrollLeft)-canva.offsetLeft;
 	var cY = (event.clientY+document.body.scrollTop)-canva.offsetTop;
-	var pA = canva.getContext("2d");
+	var pA = layer[0].getContext("2d");
 		pA.lineWidth = 10;
 		for(var i=0;i<canvasProps.movableCoords.length/2;i++){
 			pA.beginPath();
@@ -371,6 +396,7 @@ function moveMe(){
 			} 
 		}
 
+	
 	if(firingOnce.pointToMove!==null){
 		document.body.style.cursor="pointer";
 		overPoint(1);
@@ -443,9 +469,10 @@ function overPoint(pos){
 
 function drawBezier(gC,dur,whatToCount){
 	
-	var c = document.getElementById("drawBezier");
+	var c = document.getElementById("canvaContainer");
+	var layer = c.children;
 	var oP = document.getElementById("outputCoords");
-	var ctx=c.getContext("2d");
+	var ctx= layer[0].getContext("2d");
 	var cRad = 3;
 	var paddingY = 220;
 	var margin = 20;
@@ -458,6 +485,7 @@ function drawBezier(gC,dur,whatToCount){
 	var boldPoints = ["#9BC5CC","#629DB1","rgba(255,255,255,.9)"];
 	var thinPoints = ["#9EC5CB","#9EC5CB","#9EC5CB"];
 	var curvePoints = ["#0B2C47","#0B2C47","transparent"];
+	var curvePoints2 = ["#FF8800","#FF8800","#transparent"];
 	var durationPoint = ["#0B2C47","#71ACB6","#71ACB6"];
 	
 	var dBoldPoints,dThinPoints=[],dDurationPoint;
@@ -465,15 +493,26 @@ function drawBezier(gC,dur,whatToCount){
 	
 	function edges(inout,xy,side){	//arg1: 0:outOfLimit, 1:limited; arg2: x:0, y:1; arg3 left/top:0, right/bottom:1;
 		var isLimited = inout===0 ? 0:xy===0 ? margin:paddingY;
-		var r = xy===0 ? [0+isLimited,c.width-isLimited]:[0+isLimited,c.height-isLimited];
+		var r = xy===0 ? [0+isLimited,layer[0].width-isLimited]:[0+isLimited,layer[0].height-isLimited];
 		return r[side];
 	}	
 	
+	
+
+	
+	
+	
+	
+	
+	
+
+	
+
 	function coordsToPixels(){
-		var tPx = function(crdX){return margin+((c.width-(margin*2))*crdX);};
-		var tPy = function(crdY){return c.height-paddingY-((c.height-(paddingY*2))*crdY);};
-		var tNx = function(bzX){return (bzX-margin)/(c.width-(margin*2));};
-		var tNy = function(bzY){return 1-((bzY-paddingY)/(c.height-(paddingY*2)));};
+		var tPx = function(crdX){return margin+((layer[0].width-(margin*2))*crdX);};
+		var tPy = function(crdY){return layer[0].height-paddingY-((layer[0].height-(paddingY*2))*crdY);};
+		var tNx = function(bzX){return (bzX-margin)/(layer[0].width-(margin*2));};
+		var tNy = function(bzY){return 1-((bzY-paddingY)/(layer[0].height-(paddingY*2)));};
 		
 		var nFx = whatToCount ? tNx:tPx;
 		var nFy = whatToCount ? tNy:tPy;
@@ -514,6 +553,7 @@ function drawBezier(gC,dur,whatToCount){
 			cA = [];
 		}		
 		
+		
 		while(bA.length>2){
 					for(var y=0;y<bA.length-2;y++){
 						cA.push(((bA[y+2]-bA[y])*(bXnew))+bA[y]);
@@ -531,15 +571,19 @@ function drawBezier(gC,dur,whatToCount){
 				}
 		return dDurationPoint;
 	}
+				
 
 	clear();
 	coordsToPixels();
 	algorithm();
 	drawCoords();
 	drawEdges();
-	drawProgress();
+	drawProgressY();
+	drawDurationProgress();
 	drawLines();
 	drawPoints(nrOfDots);
+
+
 
 	function drawSth(obj,iter,lW,sS,fS,sB,sX,sY,sC,tD){
 		for(var ct=0;ct<iter;ct++){
@@ -584,11 +628,15 @@ function drawBezier(gC,dur,whatToCount){
 			});
 	}
 
-	function drawProgress(){
+	function drawProgressY(){
 			drawSth(ctx,1,2,progress[0],progress[1],0,0,0,progress[2],function(ct){
 				ctx.fillRect(edges(1,0,0),edges(1,1,1),edges(1,0,1)-edges(1,0,0),-edges(1,1,1)+algorithm()[1]);
 			});
-		
+	}
+	function drawDurationProgress(){
+			drawSth(ctx,1,2,progress[0],progress[1],0,0,0,progress[2],function(ct){
+				ctx.fillRect(edges(1,0,0),edges(1,1,0),(edges(1,0,1)-edges(1,0,0))*dur,edges(1,1,1)-edges(1,1,0));
+			});
 	}
 
 	function drawLines(){
@@ -605,6 +653,9 @@ function drawBezier(gC,dur,whatToCount){
 			});			
 	}
 
+
+
+
 	function drawPoints(num){
 			drawSth(ctx,dThinPoints.length,1,thinPoints[0],thinPoints[1],0,0,0,thinPoints[2],function(ct){	//durationA points
 				var passed = dThinPoints[ct];
@@ -614,8 +665,16 @@ function drawBezier(gC,dur,whatToCount){
 			});				
 			drawSth(ctx,num,1,curvePoints[0],curvePoints[1],0,0,0,curvePoints[2],function(ct){		//draw Curve
 				var nDur=ct/num;
+				
 				ctx.arc(algorithm(nDur)[0],algorithm(nDur)[1],1,0,2*Math.PI);
-			});				
+			});		
+			drawSth(ctx,num,1,curvePoints2[0],curvePoints2[1],0,0,0,curvePoints2[2],function(ct){		//draw Curve
+				var nDur=ct/num;
+				var nowy = (edges(1,0,1)-edges(1,0,0))*nDur+edges(1,0,0);
+				ctx.arc(nowy,algorithm(nDur)[1],1,0,2*Math.PI);
+			});		
+			
+			
 			drawSth(ctx,1,10,boldPoints[0],boldPoints[1],0,0,0,boldPoints[2],function(ct){	//points A
 				ctx.arc(dBoldPoints[0],dBoldPoints[1],cRad,0,2*Math.PI);
 			});				
@@ -627,6 +686,7 @@ function drawBezier(gC,dur,whatToCount){
 			});				
 			drawSth(ctx,1,10,durationPoint[0],durationPoint[1],10,0,0,durationPoint[2],function(ct){	//durationC point
 				ctx.arc(algorithm()[0],algorithm()[1],cRad,0,2*Math.PI);
+
 			});				
 	}
 }

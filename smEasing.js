@@ -20,14 +20,17 @@ smEasing.prototype.run = function(){
 		} else {
 			this.queue = true;
 			}
-	var sI,sT,rV,d,bA,bX=[],bY=[],bXnew,bYnew,cA = [],pO = this,i=0;
+	var pO = this,i=0;
+	var sI,sT;
+	var rV;
+	var d,bX=[],bY=[],bXnew,bYnew,cA = [];
 	var	aA = this.coords.slice();
 		aA.unshift(0,0);
+
 		for(var z=0;z<aA.length;z+=2){
 			bX.push(aA[z]);
 			bY.push(aA[z+1]);
 		}
-
 	var hR = Math.round((this.fps*this.time)/1000);
 	var nT = this.time/hR;
 	clearInterval(sI);
@@ -37,9 +40,8 @@ smEasing.prototype.run = function(){
 			pO.iteration = i;
 			pO.duration = parseFloat(((1/(Math.round((pO.fps*pO.time)/1000)))*pO.iteration).toFixed(2));
 			d = (1/hR)*i;
-			bA = aA.slice();
+			
 			bXnew = bX.slice();
-			bYnew = bY.slice();
 			while(bXnew.length>1){
 				for(var y=0;y<bXnew.length-1;y++){
 					cA.push(((bXnew[y+1]-bXnew[y])*d)+bXnew[y]);
@@ -47,8 +49,7 @@ smEasing.prototype.run = function(){
 				bXnew = cA.slice();
 				cA = [];
 			}
-			
-			
+			bYnew = bY.slice();
 			while(bYnew.length>1){
 				for(var y=0;y<bYnew.length-1;y++){
 					cA.push(((bYnew[y+1]-bYnew[y])*bXnew[0])+bYnew[y]);
@@ -56,6 +57,8 @@ smEasing.prototype.run = function(){
 				bYnew = cA.slice();
 				cA = [];
 			}
+			
+			
 			rV = pO.start+((pO.stop-pO.start)*bYnew[0]);
 
 			pO.action(rV);
@@ -77,6 +80,7 @@ smEasing.prototype.run = function(){
 		},nT);
 	},pO.delay);
 };
+
 
 
 
