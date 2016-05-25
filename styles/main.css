@@ -1,13 +1,9 @@
 @import url(https://fonts.googleapis.com/css?family=Poiret+One);
 
-/*
+
 *::selection {
 	background-color:transparent;
 }
-*/
-
-/* FORMATOWANIE LAYOUTU*/
-
 
 .vertical_div>*::selection {
 	background-color:transparent;
@@ -298,8 +294,6 @@ option{
 -moz-user-select: none;
 -ms-user-select: none;
 user-select: none;	
-	
-	
 }
 
 .lCont{
