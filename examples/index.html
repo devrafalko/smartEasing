@@ -4,11 +4,11 @@
 <head>
 	<title>Easing Curves Creator</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" type="text/css" href="../styles/main.css"/>
 	<link rel="Shortcut icon" href="../media/sE.png" />
 	<script src="../easingModes.js"></script>
 	<script src="../smEasing.js"></script>
 	<script src="../js/main.js"></script>
+	<link rel="stylesheet" type="text/css" href="../styles/main.css"/>
 
 </head>
 
@@ -45,7 +45,7 @@
 
 	<div class="mainCont">
 		<div>
-			<input type="text" id="outputCoords" readonly="readonly" onclick="cC(0,this)" onmouseover="cC(1)" onmouseout="cC(2)"/>
+			<p id="outputCoords" onclick="cC(0,this)" onmouseover="cC(1)" onmouseout="cC(2)"></p>
 			<p id="outputStatus">Array copied to clipboard</p>
 		</div>
 		<div id="canvaContainer"></div>
@@ -63,7 +63,5 @@
 			<div id="samp6"></div>
 		</div>
 	</div>
-	
-	
 </body>
 </html>

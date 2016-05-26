@@ -21,7 +21,6 @@ firingOnce = {
 	isCursorOnPoint:null,
 	easingIncr:0
 };
-
 defaultValues = {
 	dur: 0,
 	samp1: 0,
@@ -38,8 +37,14 @@ function cC(action,obj){
 	var out = document.getElementById("outputStatus");
 	
 	if(action===0){
-		obj.select();
+		var hiddCont = document.createElement("INPUT");
+		hiddCont.setAttribute("value",obj.textContent);
+		hiddCont.style.position="fixed";
+		hiddCont.style.visibility="0";
+		document.body.appendChild(hiddCont);
+		hiddCont.select();
 		var state = document.execCommand('copy');
+		document.body.removeChild(hiddCont);
 		newValue = state ? newValue:'Unable to copy! Copy array manually.';
 	}
 	
@@ -51,6 +56,7 @@ function cC(action,obj){
 	if(action!==2){
 		out.innerHTML = newValue;
 		out.style.color = "rgba(255,255,255,.7)";
+		
 	}
 	
 	if(action!==1){
@@ -111,7 +117,6 @@ function setListeners(state){
 			}
 }
 
-
 function setModeCoords(){	//Push selected coords into bProps Object to further usage
 	var sel = document.getElementById("easingMode");
 	var modeList = Object.getOwnPropertyNames(easingModes);
@@ -122,9 +127,7 @@ function setModeCoords(){	//Push selected coords into bProps Object to further u
 		for(var i=0;i<pos.length;i++){
 			bProps.coords.push(pos[i]);	//push y
 		}
-	drawBezier(bProps.coords,bProps.dur,0,2);
 	setNewPoint();
-	createEasingObjects();
 	}
 }
 
@@ -132,14 +135,15 @@ function adjustXcoords(){
 	for(var i=0,y=1;i<bProps.coords.length;i+=2,y++){
 		bProps.coords.splice(i,1,(1/(bProps.coords.length/2))*y);
 	}
-	drawBezier(bProps.coords,bProps.dur,0,2);
 	setNewPoint();
-	createEasingObjects();
 }
 
 function setNewPoint(){
 	var sel = document.getElementById("numOfPoints");
 	sel.selectedIndex = ((bProps.coords.length-1)/2)-1;
+	prepareOutputCoords();
+	drawBezier(bProps.coords,bProps.dur,0,2);
+	createEasingObjects();
 }
 
 function addPoints(){
@@ -147,7 +151,6 @@ function addPoints(){
 	var easingMode = document.getElementById("easingMode");
 	var newVal = sel.options[sel.selectedIndex].innerHTML;
 	var newPoints = newVal-((bProps.coords.length/2)-1);
-	
 	if(newPoints<0){
 		bProps.coords.splice(bProps.coords.length-2+newPoints*2,-newPoints*2);
 	} else if(newPoints>0){
@@ -165,10 +168,10 @@ function addPoints(){
 	}
 		switchMe(event,true);
 		easingMode.selectedIndex = easingMode.options.length-1;
+		prepareOutputCoords();
 		drawBezier(bProps.coords,bProps.dur,0,2);
 		createEasingObjects();
 }
-
 
 function setTime(){
 	var timeR = document.getElementById("timeRange");
@@ -357,7 +360,6 @@ function createLayers(contId,numOfLayers,width,height){
 
 function canvaEvents(getE,state){		//	0: move		1: click	2: release
 	var canva = document.getElementById("canvaContainer");
-	
 	var fE = ["mousemove","mousedown","mouseup"];
 	var fF = [moveMe,clickMe,releaseMe];
 	var whichEvent = Object.getOwnPropertyNames(firingOnce)[getE];
@@ -380,7 +382,6 @@ function moveMe(){
 	if(!firingOnce.movingState){
 		firingOnce.pointToMove = null;
 	}
-	
 	var canva = document.getElementById("canvaContainer");
 	var layer = canva.children;	
 	
@@ -437,18 +438,19 @@ function moveMe(){
 
 function clickMe(){
 	firingOnce.movingState = true;
+	adjustCoords(1);
 }
 
 function releaseMe(){
 	firingOnce.movingState = false;
 	document.body.style.cursor="auto";
+	adjustCoords(0);
 }
 
 function overPoint(pos){
 	if(firingOnce.isCursorOnPoint===null){
 		firingOnce.isCursorOnPoint=pos;
 	}
-
 	if(firingOnce.isCursorOnPoint!==pos&&!(firingOnce.movingState)){
 		firingOnce.isCursorOnPoint = pos;
 		
@@ -468,6 +470,44 @@ function overPoint(pos){
 	}
 }
 
+function prepareOutputCoords(){
+	var sel = document.getElementById("numOfPoints");
+	var outputCoords = document.getElementById("outputCoords");
+	var numOfCoords = Number(sel.options[sel.selectedIndex].textContent);
+	outputCoords.innerHTML = "";
+	for(var i=0;i<numOfCoords+1;i++){
+		if(i===0){
+			var addon1 = document.createTextNode("[ ");
+			outputCoords.appendChild(addon1);
+		}
+		var newSpan = document.createElement("SPAN");
+		outputCoords.appendChild(newSpan);
+		if(i!==numOfCoords){
+			var addon2 = document.createTextNode(" , ");
+			outputCoords.appendChild(addon2);
+		} else {
+			var addon3 = document.createTextNode(" ]");
+			outputCoords.appendChild(addon3);
+		}
+	}
+}
+
+function adjustCoords(state){
+	var outputCoords = document.getElementById("outputCoords");
+	var span = outputCoords.children[firingOnce.pointToMove];
+	var centerCoords = outputCoords.offsetLeft-document.body.scrollLeft+(outputCoords.offsetWidth/2);
+	var spanPosition = outputCoords.offsetLeft+span.offsetLeft-document.body.scrollLeft+(span.offsetWidth/2);
+	var relativeCentering = centerCoords-spanPosition;
+	
+	if(state===1){
+		outputCoords.style.left = relativeCentering + "px";
+		span.style.textShadow = "0px 0px 6px rgba(255,255,255,1)";
+		} else {
+			outputCoords.style.left = null;
+			span.style.textShadow = null;
+			}
+}
+
 function drawBezier(gC,dur,whatToCount,drawLayers){
 	var container = document.getElementById("canvaContainer");
 	var oP = document.getElementById("outputCoords");
@@ -479,7 +519,6 @@ function drawBezier(gC,dur,whatToCount,drawLayers){
 	var cRad = 3;
 	var paddingY = 220;
 	var margin = 20;
-	var coordsText = ["#ffffff","#ffffff","#ffffff"];
 	var progress = ["rgba(255,255,255,.05)","rgba(255,255,255,.05)","rgba(255,255,255,.25)"];
 	var limitLines = ["rgba(255,255,255,.25)","rgba(255,255,255,.25)","rgba(255,255,255,.5)"];
 	var boldLines = ["rgba(255,255,255,.15)","rgba(255,255,255,.25)","transparent"];
@@ -605,18 +644,14 @@ function drawBezier(gC,dur,whatToCount,drawLayers){
 	}
 	
 	function drawCoords(){
-			drawSth(layer1,1,2,coordsText[0],coordsText[1],8,1,3,coordsText[2],function(){
 				var n = function(x){return parseFloat(x.toFixed(2));};
-				var retS="";
 				var retA = [];
-				for(var i=0;i<bProps.coords.length;i++){
-					retA.push(n(bProps.coords[i]));
+				for(var i=0,y=0;i<bProps.coords.length;i+=2,y++){
+					oP.children[y].innerHTML = n(bProps.coords[i]) + " , " + n(bProps.coords[i+1]);
+					retA.push(n(bProps.coords[i]), n(bProps.coords[i+1]));
 				}
-				retS = "[ ".concat(retA.join(" , ")," ]");
-				oP.value = retS;
-				oP.setAttribute("title", retS);
+				oP.setAttribute("title", oP.textContent);
 				bProps.output = retA.slice();
-			});	
 	}
 
 	function drawEdges(){
