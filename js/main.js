@@ -335,7 +335,7 @@ window.onload = function(){
 	drawBezier(bProps.coords,bProps.dur,0,0);
 	setTime();
 	setDur();
-	canvaEvents(0,1);
+	canvaEvents(0,1,0);
 };
 
 function createLayers(contId,numOfLayers,width,height){
@@ -358,18 +358,20 @@ function createLayers(contId,numOfLayers,width,height){
 	}
 }
 
-function canvaEvents(getE,state){		//	0: move		1: click	2: release
+function canvaEvents(getE,state,area){		//	0: move		1: click	2: release
 	var canva = document.getElementById("canvaContainer");
 	var fE = ["mousemove","mousedown","mouseup"];
 	var fF = [moveMe,clickMe,releaseMe];
 	var whichEvent = Object.getOwnPropertyNames(firingOnce)[getE];
 	var getState = Number(firingOnce[whichEvent]);
-	var eventObj = getE===2 ? document.body:canva;
+	var eventObj = area===1 ? document.body:canva;
+	
 	if(getState===state){
 		return;
 	}
 	
 	if(state===1){
+		
 		firingOnce[whichEvent] = true;	
 		eventObj.addEventListener(fE[getE],fF[getE]);
 	} else if(state===0){
@@ -381,12 +383,12 @@ function canvaEvents(getE,state){		//	0: move		1: click	2: release
 function moveMe(){
 	if(!firingOnce.movingState){
 		firingOnce.pointToMove = null;
+		canvaEvents(0,0,1);
+		canvaEvents(0,1,0);		
 	}
 	var canva = document.getElementById("canvaContainer");
 	var layer = canva.children;	
-	
 	var sel = document.getElementById("easingMode");
-	
 	var margin = 20;
 	var cX = (event.clientX+document.body.scrollLeft)-canva.offsetLeft;
 	var cY = (event.clientY+document.body.scrollTop)-canva.offsetTop;
@@ -403,13 +405,13 @@ function moveMe(){
 	if(firingOnce.pointToMove!==null){
 		document.body.style.cursor="pointer";
 		overPoint(1);
-		canvaEvents(1,1);
-		canvaEvents(2,1);
+		canvaEvents(1,1,0);
+		canvaEvents(2,1,1);
 		}else{
 			document.body.style.cursor="auto";
 			overPoint(-1);
-			canvaEvents(1,0);
-			canvaEvents(2,0);					
+			canvaEvents(1,0,0);
+			canvaEvents(2,0,1);					
 			}
 
 	if(firingOnce.movingState&&firingOnce.pointToMove!==null){
@@ -439,6 +441,9 @@ function moveMe(){
 function clickMe(){
 	firingOnce.movingState = true;
 	adjustCoords(1);
+	canvaEvents(0,0,0);
+	canvaEvents(0,1,1);
+
 }
 
 function releaseMe(){
