@@ -1,18 +1,18 @@
 /* global easingModes */
 
-bProps = {
+var bProps = {
 	coords: [],
 	output: [],
 	time: null,
 	dur: null
 };
 
-canvasProps = {
+var canvasProps = {
 	coords: [],
 	movableCoords: []
 };
 
-firingOnce = {
+var firingOnce = {
 	canvaOnMouseMove: false,
 	pointOnClick: false,
 	pointOnRelease: false,
@@ -21,7 +21,7 @@ firingOnce = {
 	isCursorOnPoint:null,
 	easingIncr:0
 };
-defaultValues = {
+var defaultValues = {
 	dur: 0,
 	samp1: 0,
 	samp2: 1,
@@ -29,6 +29,10 @@ defaultValues = {
 	samp4: 0,
 	samp5: 40,
 	samp6: 0
+};
+
+var canvaElements = {
+	mode: 0
 };
 
 var newSetTimeout;
@@ -118,6 +122,18 @@ function setListeners(state){
 			mS.setAttribute("disabled","disabled");
 			canvaEvents(0,0,0);
 			}
+}
+
+function rC(state){
+	var radios = document.getElementsByClassName("radio");
+	for(var i=0;i<radios.length;i++){
+		radios[i].style.background = null;
+		radios[i].style.boxShadow = null;
+	}
+	radios[state].style.background = "linear-gradient(to top, rgb(0,201,158), rgb(0,250,196))";
+	radios[state].style.boxShadow = "0px 2px 2px 0px rgb(0,99,86),0px 0px 4px 1px rgb(189,255,241) inset";
+	canvaElements.mode = state;
+	drawBezier(bProps.coords,bProps.dur,0,0);
 }
 
 function setModeCoords(){	//Push selected coords into bProps Object to further usage
@@ -333,12 +349,12 @@ function easeSamples(){
 }
 
 window.onload = function(){
-	createLayers("canvaContainer",13,500,840);
+	createLayers("canvaContainer",14,500,840);
 	setListeners(true);
 	setEasingOptions();
 	setPointsOptions(16);
 	setModeCoords();
-	drawBezier(bProps.coords,bProps.dur,0,0);
+	rC(0);
 	setTime();
 	setDur();
 };
@@ -526,6 +542,7 @@ function drawBezier(gC,dur,whatToCount,drawLayers){
 						[2,3,5,6,12,13],		//changeDur, Start, Reset
 						[0,2,4,5,6,7,8,10,11,12,13],//addPoints, X/XY, ChangeMode, MovePoints
 						[10,11]];	//innerPoints,pointB - onMouseOver;
+	var hideLayer = [[],[2,3,5,6],[2,3,5,6,7,12]];
 	var cRad = 3;
 	var paddingY = 220;
 	var margin = 20;
@@ -542,22 +559,11 @@ function drawBezier(gC,dur,whatToCount,drawLayers){
 	var dBoldPoints,dThinPoints=[],dDurationPoint;
 	var nrOfDots = 100;
 	var layer = [];
+	var canvaDraw = [];
 	for(var i=0;i<drawFunctions.length;i++){
 		layer.push(container.children[i]);
+		canvaDraw.push(container.children[i].getContext("2d"));
 	}
-	var layer1 = layer[0].getContext("2d"),
-		layer2 = layer[1].getContext("2d"),
-		layer3 = layer[2].getContext("2d"),
-		layer4 = layer[3].getContext("2d"),
-		layer5 = layer[4].getContext("2d"),
-		layer6 = layer[5].getContext("2d"),
-		layer7 = layer[6].getContext("2d"),
-		layer8 = layer[7].getContext("2d"),
-		layer9 = layer[8].getContext("2d"),
-		layer10 = layer[9].getContext("2d"),
-		layer11 = layer[10].getContext("2d"),
-		layer12 = layer[11].getContext("2d"),
-		layer13 = layer[12].getContext("2d");
 	
 	function edges(inout,xy,side){	//arg1: 0:outOfLimit, 1:limited; arg2: x:0, y:1; arg3 left/top:0, right/bottom:1;
 		var isLimited = inout===0 ? 0:xy===0 ? margin:paddingY;
@@ -632,7 +638,17 @@ function drawBezier(gC,dur,whatToCount,drawLayers){
 	algorithm();
 	
 	for(var i=0;i<initFunction[drawLayers].length;i++){
-		drawFunctions[initFunction[drawLayers][i]]();
+		var passed = initFunction[drawLayers][i];
+		var checkDisp = hideLayer[canvaElements.mode].some(checkDisplay,passed);
+		function checkDisplay(curr){
+			return curr === passed;
+			}
+			
+		if (checkDisp){
+			clear(canvaDraw[passed]);
+			} else {
+				drawFunctions[passed]();
+				}
 	}
 
 	function drawSth(obj,iter,lW,sS,fS,sB,sX,sY,sC,tD){
@@ -667,94 +683,102 @@ function drawBezier(gC,dur,whatToCount,drawLayers){
 	}
 
 	function drawEdges(){
-			clear(layer1);
-			drawSth(layer1,2,2,limitLines[0],limitLines[1],5,3,2,limitLines[2],function(ct){
-				layer1.moveTo(edges(1,0,0),edges(1,1,ct));
-				layer1.lineTo(edges(1,0,1),edges(1,1,ct));
+			clear(canvaDraw[1]);
+			drawSth(canvaDraw[1],2,2,limitLines[0],limitLines[1],5,3,2,limitLines[2],function(ct){
+				canvaDraw[1].moveTo(edges(1,0,0),edges(1,1,ct));
+				canvaDraw[1].lineTo(edges(1,0,1),edges(1,1,ct));
 			});
 		}
 	function drawProgressY(){
-			clear(layer2);
-			drawSth(layer2,1,2,progress[0],progress[1],0,0,0,progress[2],function(ct){
-				layer2.fillRect(edges(1,0,0),edges(1,1,1),edges(1,0,1)-edges(1,0,0),-edges(1,1,1)+algorithm()[1]);
+			clear(canvaDraw[2]);
+			drawSth(canvaDraw[2],1,2,progress[0],progress[1],0,0,0,progress[2],function(ct){
+				canvaDraw[2].fillRect(edges(1,0,0),edges(1,1,1),edges(1,0,1)-edges(1,0,0),-edges(1,1,1)+algorithm()[1]);
 			});
 		}
 	function drawProgressX(){
-			clear(layer3);
-			drawSth(layer3,1,2,progress[0],progress[1],0,0,0,progress[2],function(){
-				layer3.fillRect(edges(1,0,0),edges(1,1,0),(edges(1,0,1)-edges(1,0,0))*dur,edges(1,1,1)-edges(1,1,0));
+			clear(canvaDraw[3]);
+			drawSth(canvaDraw[3],1,2,progress[0],progress[1],0,0,0,progress[2],function(){
+				canvaDraw[3].fillRect(edges(1,0,0),edges(1,1,0),(edges(1,0,1)-edges(1,0,0))*dur,edges(1,1,1)-edges(1,1,0));
 			});
 		}
 	function drawBoldLines(){
-			clear(layer4);
-			drawSth(layer4,dBoldPoints.length/2-1,8,boldLines[0],boldLines[1],0,0,0,boldLines[2],function(ct){	//point lines
-				layer4.moveTo(dBoldPoints[ct*2],dBoldPoints[ct*2+1]);
-				layer4.lineTo(dBoldPoints[ct*2+2],dBoldPoints[ct*2+3]);
+			clear(canvaDraw[4]);
+			drawSth(canvaDraw[4],dBoldPoints.length/2-1,8,boldLines[0],boldLines[1],0,0,0,boldLines[2],function(ct){	//point lines
+				canvaDraw[4].moveTo(dBoldPoints[ct*2],dBoldPoints[ct*2+1]);
+				canvaDraw[4].lineTo(dBoldPoints[ct*2+2],dBoldPoints[ct*2+3]);
 			});	
 		}
 	function drawThinLines(){
-			clear(layer5);
-			drawSth(layer5,dThinPoints.length,2,thinLines[0],thinLines[1],0,0,0,thinLines[2],function(ct){	//duration lines
+			clear(canvaDraw[5]);
+			drawSth(canvaDraw[5],dThinPoints.length,2,thinLines[0],thinLines[1],0,0,0,thinLines[2],function(ct){	//duration lines
 				var passed = dThinPoints[ct];
-				drawSth(layer5,passed.length/2-1,2,thinLines[0],thinLines[1],0,0,0,thinLines[2],function(ct){	//duration lines
-					layer5.moveTo(passed[ct*2],passed[ct*2+1]);
-					layer5.lineTo(passed[ct*2+2],passed[ct*2+3]);
+				drawSth(canvaDraw[5],passed.length/2-1,2,thinLines[0],thinLines[1],0,0,0,thinLines[2],function(ct){	//duration lines
+					canvaDraw[5].moveTo(passed[ct*2],passed[ct*2+1]);
+					canvaDraw[5].lineTo(passed[ct*2+2],passed[ct*2+3]);
 				});	
 			});			
 		}
 	function drawDurPoints(){
-			clear(layer6);
-			drawSth(layer6,dThinPoints.length,1,thinPoints[0],thinPoints[1],0,0,0,thinPoints[2],function(ct){	//durationA points
+			clear(canvaDraw[6]);
+			drawSth(canvaDraw[6],dThinPoints.length,1,thinPoints[0],thinPoints[1],0,0,0,thinPoints[2],function(ct){	//durationA points
 				var passed = dThinPoints[ct];
-				drawSth(layer6,passed.length/2,1,thinPoints[0],thinPoints[1],0,0,0,thinPoints[2],function(ct){		//durationB points
-					layer6.arc(passed[ct*2],passed[ct*2+1],cRad,0,2*Math.PI);
+				drawSth(canvaDraw[6],passed.length/2,1,thinPoints[0],thinPoints[1],0,0,0,thinPoints[2],function(ct){		//durationB points
+					canvaDraw[6].arc(passed[ct*2],passed[ct*2+1],cRad,0,2*Math.PI);
 				});				
 			});	
 		}
 	function drawCurveY(){
-			clear(layer7);
-			drawSth(layer7,nrOfDots,1,curvePoints[0],curvePoints[1],0,0,0,curvePoints[2],function(ct){		//draw Curve
+			clear(canvaDraw[7]);
+			drawSth(canvaDraw[7],nrOfDots,1,curvePoints[0],curvePoints[1],0,0,0,curvePoints[2],function(ct){		//draw Curve
 				var nDur=ct/nrOfDots;
 				
-				layer7.arc(algorithm(nDur)[0],algorithm(nDur)[1],1,0,2*Math.PI);
+				canvaDraw[7].arc(algorithm(nDur)[0],algorithm(nDur)[1],1,0,2*Math.PI);
 			});		
 		}
 	function drawCurveX(){
-			clear(layer8);
-			drawSth(layer8,nrOfDots,1,curvePoints2[0],curvePoints2[1],0,0,0,curvePoints2[2],function(ct){		//draw Curve
+			clear(canvaDraw[8]);
+			drawSth(canvaDraw[8],nrOfDots,1,curvePoints2[0],curvePoints2[1],0,0,0,curvePoints2[2],function(ct){		//draw Curve
 				var nDur=ct/nrOfDots;
 				var nowy = (edges(1,0,1)-edges(1,0,0))*nDur+edges(1,0,0);
-				layer8.arc(nowy,algorithm(nDur)[1],1,0,2*Math.PI);
+				canvaDraw[8].arc(nowy,algorithm(nDur)[1],1,0,2*Math.PI);
 			});		
 		}
 	function drawPointA(){
-			clear(layer9);
-			drawSth(layer9,1,10,boldPoints[0],boldPoints[1],0,0,0,boldPoints[2],function(){	//points A
-				layer9.arc(dBoldPoints[0],dBoldPoints[1],cRad,0,2*Math.PI);
+			clear(canvaDraw[9]);
+			drawSth(canvaDraw[9],1,10,boldPoints[0],boldPoints[1],0,0,0,boldPoints[2],function(){	//points A
+				canvaDraw[9].arc(dBoldPoints[0],dBoldPoints[1],cRad,0,2*Math.PI);
 			});				
 		}
 	function drawPointB(){
-			clear(layer10);
-			drawSth(layer10,dBoldPoints.length/2-2,10,boldPoints[0],boldPoints[1],firingOnce.easingIncr,0,0,boldPoints[2],function(ct){	//points A,B,...
-				layer10.arc(dBoldPoints[ct*2+2],dBoldPoints[ct*2+3],cRad,0,2*Math.PI);
+			clear(canvaDraw[10]);
+			drawSth(canvaDraw[10],dBoldPoints.length/2-2,10,boldPoints[0],boldPoints[1],firingOnce.easingIncr,0,0,boldPoints[2],function(ct){	//points A,B,...
+				canvaDraw[10].arc(dBoldPoints[ct*2+2],dBoldPoints[ct*2+3],cRad,0,2*Math.PI);
 			});
 		}
 	function drawInnerPoints(){
-			clear(layer11);
-			drawSth(layer11,1,10,boldPoints[0],boldPoints[1],firingOnce.easingIncr,0,0,boldPoints[2],function(){	//points BaseB
-				layer11.arc(dBoldPoints[dBoldPoints.length-2],dBoldPoints[dBoldPoints.length-1],cRad,0,2*Math.PI);
+			clear(canvaDraw[11]);
+			drawSth(canvaDraw[11],1,10,boldPoints[0],boldPoints[1],firingOnce.easingIncr,0,0,boldPoints[2],function(){	//points BaseB
+				canvaDraw[11].arc(dBoldPoints[dBoldPoints.length-2],dBoldPoints[dBoldPoints.length-1],cRad,0,2*Math.PI);
 			});	
 		}
 	function drawEasingPoint(){
-			clear(layer12);
-			drawSth(layer12,1,10,easingPoint[0],easingPoint[1],10,0,0,easingPoint[2],function(){	//durationC point
-				layer12.arc(algorithm()[0],algorithm()[1],cRad,0,2*Math.PI);
+			clear(canvaDraw[12]);
+			drawSth(canvaDraw[12],1,10,easingPoint[0],easingPoint[1],10,0,0,easingPoint[2],function(){	//durationC point
+				canvaDraw[12].arc(algorithm()[0],algorithm()[1],cRad,0,2*Math.PI);
 			});				
 		}
 	function drawDurationPoint(){
-			clear(layer13);
-			drawSth(layer13,1,10,durationPoint[0],durationPoint[1],10,0,0,durationPoint[2],function(){	//durationC point
-				layer13.arc((edges(1,0,1)-edges(1,0,0))*dur+edges(1,0,0),algorithm()[1],cRad,0,2*Math.PI);
+			clear(canvaDraw[13]);
+			drawSth(canvaDraw[13],1,10,durationPoint[0],durationPoint[1],10,0,0,durationPoint[2],function(){	//durationC point
+				canvaDraw[13].arc((edges(1,0,1)-edges(1,0,0))*dur+edges(1,0,0),algorithm()[1],cRad,0,2*Math.PI);
 			});				
 		}
 }
+
+
+
+
+
+
+
+

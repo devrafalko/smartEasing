@@ -319,3 +319,28 @@ option{
 	line-height:10;
 }
 
+.radio {
+	display:inline-block;
+	width:17px;
+	height:17px;
+	margin:0 10px;
+	border-radius:50%;
+	background-color:#ff55aa;
+	background: linear-gradient(to top, rgb(53,126,144), rgb(135,182,193));
+	box-shadow:0px 2px 2px 0px rgb(14,67,111),0px 0px 4px 1px rgb(158,198,203) inset;
+	cursor:pointer;
+	transition:box-shadow .2s ease-in-out; 
+}
+
+.radio:hover{
+	box-shadow:0px -1px 6px 0px rgb(14,67,111),0px 0px 4px 1px rgb(255,255,255) inset;
+	
+}
+
+
+.radioActive {
+	background: linear-gradient(to top, rgb(0,201,158), rgb(0,250,196));
+	box-shadow:0px 2px 2px 0px rgb(0,99,86),0px 0px 4px 1px rgb(189,255,241) inset;
+}
+
+
