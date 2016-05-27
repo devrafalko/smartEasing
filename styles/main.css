@@ -274,6 +274,7 @@ option{
 }
 
 #outputCoords{
+	margin:0;
 	position:relative;
 	top:0px;
 	left:0px;

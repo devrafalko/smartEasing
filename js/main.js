@@ -104,9 +104,11 @@ function setListeners(state){
 		dR.addEventListener("input",setDur);
 		pS.addEventListener("change",addPoints);
 		mS.addEventListener("change",setModeCoords);
+		mS.addEventListener("change",resetSamples);
 		dR.removeAttribute("readonly");
 		pS.removeAttribute("disabled");
 		mS.removeAttribute("disabled");
+		canvaEvents(0,1,0);
 		} else {
 			rB.removeEventListener("click",resetSamples);
 			sB.removeEventListener("click",easeSamples);
@@ -114,6 +116,7 @@ function setListeners(state){
 			dR.setAttribute("readonly","readonly");
 			pS.setAttribute("disabled","disabled");
 			mS.setAttribute("disabled","disabled");
+			canvaEvents(0,0,0);
 			}
 }
 
@@ -128,6 +131,9 @@ function setModeCoords(){	//Push selected coords into bProps Object to further u
 			bProps.coords.push(pos[i]);	//push y
 		}
 	setNewPoint();
+	}
+	if(document.getElementById("switchXY").getAttribute("class")==="switchX"){
+		switchMe();
 	}
 }
 
@@ -327,7 +333,7 @@ function easeSamples(){
 }
 
 window.onload = function(){
-	createLayers("canvaContainer",12,500,840);
+	createLayers("canvaContainer",13,500,840);
 	setListeners(true);
 	setEasingOptions();
 	setPointsOptions(16);
@@ -335,7 +341,6 @@ window.onload = function(){
 	drawBezier(bProps.coords,bProps.dur,0,0);
 	setTime();
 	setDur();
-	canvaEvents(0,1,0);
 };
 
 function createLayers(contId,numOfLayers,width,height){
@@ -506,7 +511,7 @@ function adjustCoords(state){
 	
 	if(state===1){
 		outputCoords.style.left = relativeCentering + "px";
-		span.style.textShadow = "0px 0px 6px rgba(255,255,255,1)";
+		span.style.textShadow = "2px 2px 1px rgba(255,255,255,1)";
 		} else {
 			outputCoords.style.left = null;
 			span.style.textShadow = null;
@@ -516,23 +521,24 @@ function adjustCoords(state){
 function drawBezier(gC,dur,whatToCount,drawLayers){
 	var container = document.getElementById("canvaContainer");
 	var oP = document.getElementById("outputCoords");
-	var drawFunctions = [drawCoords,drawEdges,drawProgressY,drawProgressX,drawBoldLines,drawThinLines,drawDurPoints,drawCurveY,drawCurveX,drawPointA,drawPointB,drawInnerPoints,drawEasingPoint];
-	var initFunction = [[0,1,2,3,4,5,6,7,8,9,10,11,12],		//initiation
-						[2,3,5,6,12],		//changeDur, Start, Reset
-						[0,2,4,5,6,7,8,10,11,12],//addPoints, X/XY, ChangeMode, MovePoints
+	var drawFunctions = [drawCoords,drawEdges,drawProgressY,drawProgressX,drawBoldLines,drawThinLines,drawDurPoints,drawCurveY,drawCurveX,drawPointA,drawPointB,drawInnerPoints,drawEasingPoint,drawDurationPoint];
+	var initFunction = [[0,1,2,3,4,5,6,7,8,9,10,11,12,13],		//initiation
+						[2,3,5,6,12,13],		//changeDur, Start, Reset
+						[0,2,4,5,6,7,8,10,11,12,13],//addPoints, X/XY, ChangeMode, MovePoints
 						[10,11]];	//innerPoints,pointB - onMouseOver;
 	var cRad = 3;
 	var paddingY = 220;
 	var margin = 20;
-	var progress = ["rgba(255,255,255,.05)","rgba(255,255,255,.05)","rgba(255,255,255,.25)"];
-	var limitLines = ["rgba(255,255,255,.25)","rgba(255,255,255,.25)","rgba(255,255,255,.5)"];
+	var progress = ["rgba(255,255,255,.02)","rgba(255,255,255,.02)","rgba(255,255,255,.25)"];
+	var limitLines = ["rgba(255,255,255,.5)","rgba(255,255,255,.5)","rgba(255,255,255,.5)"];
 	var boldLines = ["rgba(255,255,255,.15)","rgba(255,255,255,.25)","transparent"];
-	var thinLines = ["rgba(255,255,255,.5)","rgba(255,255,255,.5)","transparent"];
+	var thinLines = ["rgba(255,255,255,.3)","rgba(255,255,255,.3)","transparent"];
 	var boldPoints = ["#9BC5CC","#629DB1","rgba(255,255,255,.9)"];
 	var thinPoints = ["#9EC5CB","#9EC5CB","#9EC5CB"];
 	var curvePoints = ["#0B2C47","#0B2C47","transparent"];
-	var curvePoints2 = ["#FF8800","#FF8800","#transparent"];
-	var durationPoint = ["#0B2C47","#71ACB6","#71ACB6"];
+	var curvePoints2 = ["#EE6E73","#EE6E73","#transparent"];
+	var easingPoint = ["#0B2C47","#71ACB6","#71ACB6"];
+	var durationPoint = ["#EF5350","#FFCDD2","#FFCDD2"];
 	var dBoldPoints,dThinPoints=[],dDurationPoint;
 	var nrOfDots = 100;
 	var layer = [];
@@ -550,7 +556,8 @@ function drawBezier(gC,dur,whatToCount,drawLayers){
 		layer9 = layer[8].getContext("2d"),
 		layer10 = layer[9].getContext("2d"),
 		layer11 = layer[10].getContext("2d"),
-		layer12 = layer[11].getContext("2d");
+		layer12 = layer[11].getContext("2d"),
+		layer13 = layer[12].getContext("2d");
 	
 	function edges(inout,xy,side){	//arg1: 0:outOfLimit, 1:limited; arg2: x:0, y:1; arg3 left/top:0, right/bottom:1;
 		var isLimited = inout===0 ? 0:xy===0 ? margin:paddingY;
@@ -740,8 +747,14 @@ function drawBezier(gC,dur,whatToCount,drawLayers){
 		}
 	function drawEasingPoint(){
 			clear(layer12);
-			drawSth(layer12,1,10,durationPoint[0],durationPoint[1],10,0,0,durationPoint[2],function(){	//durationC point
+			drawSth(layer12,1,10,easingPoint[0],easingPoint[1],10,0,0,easingPoint[2],function(){	//durationC point
 				layer12.arc(algorithm()[0],algorithm()[1],cRad,0,2*Math.PI);
+			});				
+		}
+	function drawDurationPoint(){
+			clear(layer13);
+			drawSth(layer13,1,10,durationPoint[0],durationPoint[1],10,0,0,durationPoint[2],function(){	//durationC point
+				layer13.arc((edges(1,0,1)-edges(1,0,0))*dur+edges(1,0,0),algorithm()[1],cRad,0,2*Math.PI);
 			});				
 		}
 }
