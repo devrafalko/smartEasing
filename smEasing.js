@@ -1,4 +1,4 @@
-/* global Function */
+/* global Function, easingModes */
 
 function smEasing(o){
 	this.coords = o.coords;
@@ -22,11 +22,23 @@ smEasing.prototype.run = function(){
 			}
 	var pO = this,i=0;
 	var sI,sT;
-	var rV;
+	var rV,aA;
 	var d,bX=[],bY=[],bXnew,bYnew,cA = [];
-	var	aA = this.coords.slice();
+	
+	if(validateMe.isArray(this.coords)){
+		aA = this.coords.slice();
+	} else if(validateMe.isString(this.coords)){
+		var cList = Object.getOwnPropertyNames(easingModes);
+		for(var y=0;y<cList.length;y++){
+			if(this.coords.toLowerCase()===cList[y].toLowerCase()){
+				aA = easingModes[cList[y]].slice();
+				break;
+			} else if(y===cList.length-1){
+				aA = easingModes[cList[0]].slice();
+			}
+		}
+	}
 		aA.unshift(0,0);
-
 		for(var z=0;z<aA.length;z+=2){
 			bX.push(aA[z]);
 			bY.push(aA[z+1]);
@@ -82,6 +94,12 @@ smEasing.prototype.run = function(){
 };
 
 
-
-
+validateMe = {
+	isArray: function(obj){
+		return obj.constructor.toString().indexOf("Array") !== -1;
+	},
+	isString: function(obj){
+		return (typeof obj) === "string";
+	}
+};
 

@@ -144,7 +144,7 @@ function setModeCoords(){	//Push selected coords into bProps Object to further u
 	if(typeof checked !== "undefined"){
 		bProps.coords = [];
 		for(var i=0;i<pos.length;i++){
-			bProps.coords.push(pos[i]);	//push y
+			bProps.coords.push(pos[i]);
 		}
 	setNewPoint();
 	}
@@ -217,7 +217,7 @@ function switchMe(event,toSwitch){
 	var cA = obj.getAttribute("class");
 		if((!toSwitch&&cA==="switchY")||(toSwitch&&cA==="switchX")){
 			adjustXcoords();
-			
+
 		}
 		if(!toSwitch){
 			var nA = cA==="switchY" ? "switchX":"switchY";
@@ -776,9 +776,7 @@ function drawBezier(gC,dur,whatToCount,drawLayers){
 }
 
 
+	
 
-
-
-
-
+	
 
