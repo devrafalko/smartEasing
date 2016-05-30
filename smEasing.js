@@ -1,17 +1,33 @@
 /* global Function, easingModes */
 
-function smEasing(o){
-	this.coords = o.coords;
-	this.fps = o.fps;
+function smEasing(o,p){
+	this.coords = passVal(o.coords,p,0);
+	this.fps = passVal(o.fps,p,1);
 	this.start = o.start;
 	this.stop = o.stop;
-	this.action = o.action;
-	this.time = o.time;
-	this.after = o.after;
+	this.time = passVal(o.time,p,2);
 	this.delay = o.delay;
+	this.onStart = o.onStart;
+	this.onStop = o.onStop;
+	this.action = passVal(o.action,p,3);
+	this.after = o.after;
 	this.iteration = 0;
 	this.duration = 0;
 	this.queue = false;
+	this.objQueue = validMe.isEmpty(p) ? []:p[4];
+	
+	setDefaults.call(this,defVals);
+	parseValues.call(this);
+	validateValues.call(this);
+	
+	var passing = [this.coords,this.fps,this.time,this.action,this.objQueue];
+	if(!validMe.isEmpty(this.after)){
+		this.nextAnimation = new smEasing(this.after,passing);
+	}
+
+	function passVal(p,a,v){
+		return validMe.isEmpty(p) ? validMe.isEmpty(a) ? p:a[v]:p;
+	}
 }
 
 smEasing.prototype.run = function(){
@@ -20,14 +36,15 @@ smEasing.prototype.run = function(){
 		} else {
 			this.queue = true;
 			}
+	this.objQueue.push(this);
 	var pO = this,i=0;
 	var sI,sT;
 	var rV,aA;
 	var d,bX=[],bY=[],bXnew,bYnew,cA = [];
 	
-	if(validateMe.isArray(this.coords)){
+	if(validMe.isArray(this.coords)){
 		aA = this.coords.slice();
-	} else if(validateMe.isString(this.coords)){
+	} else if(validMe.isString(this.coords)){
 		var cList = Object.getOwnPropertyNames(easingModes);
 		for(var y=0;y<cList.length;y++){
 			if(this.coords.toLowerCase()===cList[y].toLowerCase()){
@@ -70,36 +87,136 @@ smEasing.prototype.run = function(){
 				cA = [];
 			}
 			
-			
 			rV = pO.start+((pO.stop-pO.start)*bYnew[0]);
-
 			pO.action(rV);
 			
 			if(i>=hR){
 				clearInterval(sI);
-				pO.queue = false;
 				pO.iteration = 0;
-				if(typeof pO.after !== "undefined"){
-
-					var rP = ["coords","fps","start","stop","action","time","delay"];
-					for(var x=0;x<rP.length;x++){
-						pO.after[rP[x]] = (typeof pO.after[rP[x]])==="undefined"? pO[rP[x]]:pO.after[rP[x]];
+				
+				if(typeof pO.nextAnimation !== "undefined"){
+					pO.nextAnimation.run();
+				} else {
+					for(var xx=0;xx<pO.objQueue.length;xx++){
+						pO.objQueue[xx].queue = false;
 					}
-					var s = new smEasing(pO.after);
-					s.run();
 				}
 			}
 		},nT);
 	},pO.delay);
 };
 
+function setDefaults(def){
+	var tC = Object.getOwnPropertyNames(def);
+	for(var i=0;i<tC.length;i++){
+		this[tC[i]] = validMe.isEmpty(this[tC[i]]) ? def[tC[i]]:this[tC[i]];
+	}
+}
 
-validateMe = {
-	isArray: function(obj){
-		return obj.constructor.toString().indexOf("Array") !== -1;
+function parseValues(){
+	this.coords = validMe.isArray(this.coords) ? parseMe.itemsToNumbers(this.coords).slice():this.coords;
+	this.start = parseMe.parseToNumber(this.start);
+	this.stop = parseMe.parseToNumber(this.stop);
+	this.fps = parseMe.parseToInteger(this.fps);
+	this.time = parseMe.parseToInteger(this.time);
+	this.time = validMe.isNumber(this.time)&&this.time<=0 ? 1:this.time;
+	this.delay = parseMe.parseToInteger(this.delay);
+	this.delay = validMe.isNumber(this.delay)&&this.delay<=0 ? 0:this.delay;
+}
+
+function validateValues(){
+	var objName = this.constructor.name;
+	var c = this.coords;
+	var f = this.fps;
+	var st = this.start;
+	var sp = this.stop;
+	var t = this.time;
+	var d = this.delay;
+	var oSt = this.onStart;
+	var oSp = this.onStop;
+	var ac = this.action;
+	var af = this.after;
+			try{
+				if(!(validMe.isArray(c)||validMe.isString(c))) throw "Error: " + "The coords value for " + objName + " object must be of type String or Array.";
+				if((validMe.isArray(c))&&(c.length<4)) throw "Error: " + "The coordinates array for " + objName + " object must containt at least 4 values.";
+				if((validMe.isArray(c))&&(!validMe.areItemsNums(c))) throw "Error: " + "Every item of coordinates array for " + objName + " object must be a number.";
+				if((validMe.isArray(c))&&(!validMe.isNumEven(c.length))) throw "Error: " + "The coordinates array for " + objName + " object must containt even number of coords.";
+				if((validMe.isArray(c))&&(c[c.length-2]!==1)) throw "Error: " + "The last but one item of coordinates array for " + objName + " object must be of value 1";
+				if((validMe.isString(c))&&(!validMe.isAnyItem(Object.getOwnPropertyNames(easingModes),c))) throw "Error: " + "The coords value '" + c + "' set for " + objName + " object is not on the list of easing modes.";
+				if(!validMe.isNumber(f)) throw "Error: " + "The fps value for " + objName + " object must be an Integer."; 
+				if(f<1) throw "Error: " + "The fps value for " + objName + " object must be higher than 0"; 
+				if(f>75) throw "Error: " + "The fps value for " + objName + " object can be at most 75."; 
+				if(!validMe.isNumber(st)) throw "Error: " + "The start value for " + objName + " object must be a number."; 
+				if(!validMe.isNumber(sp)) throw "Error: " + "The stop value for " + objName + " object must be a number."; 
+				if(st===sp) throw "Error: " + "The stop value for " + objName + " object must differ from start value.";
+				if(!validMe.isNumber(t)) throw "Error: " + "The time value for " + objName + " object must be an Integer."; 
+				if(!validMe.isNumber(d)) throw "Error: " + "The delay value for " + objName + " object must be an Integer."; 
+				if(!(validMe.isFunction(oSt))) throw "Error: " + "The onStart property for " + objName + " object must be of type Function."; 
+				if(!(validMe.isFunction(oSp))) throw "Error: " + "The onStop property for " + objName + " object must be of type Function."; 
+				if(!validMe.isFunction(ac)) throw "Error: " + "The action property for " + objName + " object must be of type Function."; 
+				if(!(validMe.isObject(af)||validMe.isEmpty(af))) throw "Error: " + "The action property for " + objName + " object must be of type Object."; 
+	} catch(err) {throw err;}
+	
+};
+
+var defVals = {
+	coords:Object.getOwnPropertyNames(easingModes)[0],
+	fps:32,
+	delay:0,
+	action:function(){},
+	onStart:function(){},
+	onStop:function(){}
+};
+
+var parseMe = {
+	parseToNumber: function(obj){
+		return isNaN(parseFloat(obj))?obj:parseFloat(obj);
 	},
-	isString: function(obj){
-		return (typeof obj) === "string";
+	itemsToNumbers: function(obj){
+		function ch(curr){
+			return parseMe.parseToNumber(curr);
+		}
+		return obj.map(ch);
+	},
+	parseToInteger: function(obj){
+		return (typeof parseMe.parseToNumber(obj))==="number" ? Math.round(parseMe.parseToNumber(obj)):obj;
 	}
 };
 
+var validMe = {
+	isArray: function(obj){
+		var ret = validMe.isEmpty(obj) ? false:obj.constructor.toString().indexOf("Array") === -1? false:true;
+		return ret;
+	},
+	isObject: function(obj){
+		var ret = validMe.isEmpty(obj) ? false:obj.constructor.toString().indexOf("Object") === -1? false:true;
+		return ret;
+	},
+	isString: function(obj){
+		return (typeof obj) === "string";
+	},
+	isFunction: function(obj){
+		return (typeof obj) === "function";
+	},
+	isNumber: function(obj){
+		return ((typeof obj) === "number"&&(!isNaN(obj)))&&(Math.abs(obj)!==Number.POSITIVE_INFINITY);
+	},
+	isEmpty: function(obj){	//undefined or null
+		return (typeof obj) === "undefined"||obj === null;
+	},
+	isNumEven: function(obj){
+		return obj/2===Math.round(obj/2);
+	},
+	areItemsNums: function(obj){
+		function checkItems(curr){
+			return validMe.isNumber(curr);
+		}
+		return obj.every(checkItems);
+	},
+	isAnyItem: function(obj,item){
+		function toLower(c){
+			return c.toLowerCase();
+		}
+		return (obj.map(toLower).indexOf(item.toLowerCase()))===-1 ? false:true;
+	}
+};

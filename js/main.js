@@ -263,8 +263,26 @@ var changeMe = {
 	}
 };
 
-var sampEasing1,sampEasing2,sampEasing3,sampEasing4;
+
+var navigation,sampEasing1,sampEasing2,sampEasing3,sampEasing4;
 function createEasingObjects(){
+	navigation = new smEasing({
+		coords:bProps.output,
+		fps:32,
+		start:0,
+		stop:100,
+		time:bProps.time*1000,
+		delay:0,
+		action:function(){
+			document.getElementById("durationValue").value = this.duration;
+			setDur();
+			if(this.duration===1){
+				setListeners(true);
+			}
+		}
+	});
+	
+	
 	sampEasing1 = new smEasing({
 		coords:bProps.output,
 		fps:32,
@@ -274,11 +292,6 @@ function createEasingObjects(){
 		delay:0,
 		action:function(a){
 			changeMe.samp1(a);
-			document.getElementById("durationValue").value = this.duration;
-			setDur();
-			if(this.duration===1){
-				setListeners(true);
-			}
 		}
 	});
 	
@@ -340,6 +353,7 @@ function createEasingObjects(){
 
 function easeSamples(){
 	setListeners(false);
+	navigation.run();
 	sampEasing1.run();
 	sampEasing2.run();
 	sampEasing3.run();
@@ -778,5 +792,4 @@ function drawBezier(gC,dur,whatToCount,drawLayers){
 
 	
 
-	
 
