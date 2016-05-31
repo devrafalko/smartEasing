@@ -185,12 +185,10 @@ var parseMe = {
 
 var validMe = {
 	isArray: function(obj){
-		var ret = validMe.isEmpty(obj) ? false:obj.constructor.toString().indexOf("Array") === -1? false:true;
-		return ret;
+		return validMe.isEmpty(obj) ? false:obj.constructor.toString().indexOf("Array") === -1? false:true;
 	},
 	isObject: function(obj){
-		var ret = validMe.isEmpty(obj) ? false:obj.constructor.toString().indexOf("Object") === -1? false:true;
-		return ret;
+		return validMe.isEmpty(obj) ? false:obj.constructor.toString().indexOf("Object") === -1? false:true;
 	},
 	isString: function(obj){
 		return (typeof obj) === "string";

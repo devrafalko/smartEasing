@@ -94,6 +94,7 @@ function setPointsOptions(num){
 }
 
 function setListeners(state){
+	var tR = document.getElementById("timeRange");
 	var dR = document.getElementById("durationValue");
 	var pS = document.getElementById("numOfPoints");
 	var rB = document.getElementById("resetSample");
@@ -106,10 +107,14 @@ function setListeners(state){
 		rB.addEventListener("click",resetSamples);
 		cD.addEventListener("click",switchMe);
 		dR.addEventListener("input",setDur);
+		dR.addEventListener("change",setDur);
+		tR.addEventListener("input",setTime);
+		tR.addEventListener("change",setTime);
 		pS.addEventListener("change",addPoints);
 		mS.addEventListener("change",setModeCoords);
 		mS.addEventListener("change",resetSamples);
-		dR.removeAttribute("readonly");
+		tR.removeAttribute("disabled");
+		dR.removeAttribute("disabled");
 		pS.removeAttribute("disabled");
 		mS.removeAttribute("disabled");
 		canvaEvents(0,1,0);
@@ -117,7 +122,8 @@ function setListeners(state){
 			rB.removeEventListener("click",resetSamples);
 			sB.removeEventListener("click",easeSamples);
 			cD.removeEventListener("click",switchMe);
-			dR.setAttribute("readonly","readonly");
+			tR.setAttribute("disabled","disabled");
+			dR.setAttribute("disabled","disabled");
 			pS.setAttribute("disabled","disabled");
 			mS.setAttribute("disabled","disabled");
 			canvaEvents(0,0,0);
@@ -127,8 +133,8 @@ function setListeners(state){
 function rC(state){
 	var radios = document.getElementsByClassName("radio");
 	for(var i=0;i<radios.length;i++){
-		radios[i].style.background = null;
-		radios[i].style.boxShadow = null;
+		radios[i].style.background = "";
+		radios[i].style.boxShadow = "";
 	}
 	radios[state].style.background = "linear-gradient(to top, rgb(0,201,158), rgb(0,250,196))";
 	radios[state].style.boxShadow = "0px 2px 2px 0px rgb(0,99,86),0px 0px 4px 1px rgb(189,255,241) inset";
@@ -168,7 +174,7 @@ function setNewPoint(){
 	createEasingObjects();
 }
 
-function addPoints(){
+function addPoints(event){
 	var sel = document.getElementById("numOfPoints");
 	var easingMode = document.getElementById("easingMode");
 	var newVal = sel.options[sel.selectedIndex].innerHTML;
@@ -415,7 +421,7 @@ function canvaEvents(getE,state,area){		//	0: move		1: click	2: release
 	}	
 }
 
-function moveMe(){
+function moveMe(event){
 	if(!firingOnce.movingState){
 		firingOnce.pointToMove = null;
 		canvaEvents(0,0,1);
@@ -541,10 +547,10 @@ function adjustCoords(state){
 	
 	if(state===1){
 		outputCoords.style.left = relativeCentering + "px";
-		span.style.textShadow = "2px 2px 1px rgba(255,255,255,1)";
+		span.style.textShadow = "2px 2px 3px rgba(255,255,255,1)";
 		} else {
 			outputCoords.style.left = null;
-			span.style.textShadow = null;
+			span.style.textShadow = "";
 			}
 }
 

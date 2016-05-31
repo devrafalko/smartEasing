@@ -90,7 +90,8 @@ body * {
 .range{
 	width:275px;
 	cursor:pointer;
-	
+	margin:0px;
+	padding:0px;
 }
 
 .output{
@@ -105,7 +106,6 @@ body * {
 	border-radius:4px;
 	margin:0 10px;
 }
-
 
 #easingMode,#numOfPoints {
 	width:200px;
@@ -297,9 +297,6 @@ option{
 	text-shadow:0px 0px 0px rgba(255,255,255,0);
 	transition:text-shadow .3s ease-in-out;
 }
-
-
-
 
 #outputStatus{
 	position:absolute;
