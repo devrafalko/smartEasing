@@ -1,6 +1,6 @@
 /* global Function, easingModes */
 
-function smEasing(o,p){
+function smEasing(o,p,b){
 	this.coords = passVal(o.coords,p,0);
 	this.fps = passVal(o.fps,p,1);
 	this.start = o.start;
@@ -14,15 +14,17 @@ function smEasing(o,p){
 	this.iteration = 0;
 	this.duration = 0;
 	this.queue = false;
-	this.objQueue = validMe.isEmpty(p) ? []:p[4];
-	
 	setDefaults.call(this,defVals);
 	parseValues.call(this);
 	validateValues.call(this);
+
+	var pA = typeof b==="undefined"? []:b;
+	pA.push(this);
+	this.allAnims = pA;
 	
-	var passing = [this.coords,this.fps,this.time,this.action,this.objQueue];
+	var passing = [this.coords,this.fps,this.time,this.action];
 	if(!validMe.isEmpty(this.after)){
-		this.nextAnimation = new smEasing(this.after,passing);
+		this.nextAnimation = new smEasing(this.after,passing,pA);
 	}
 
 	function passVal(p,a,v){
@@ -36,7 +38,7 @@ smEasing.prototype.run = function(){
 		} else {
 			this.queue = true;
 			}
-	this.objQueue.push(this);
+			
 	var pO = this,i=0;
 	var sI,sT;
 	var rV,aA;
@@ -97,8 +99,9 @@ smEasing.prototype.run = function(){
 				if(typeof pO.nextAnimation !== "undefined"){
 					pO.nextAnimation.run();
 				} else {
-					for(var xx=0;xx<pO.objQueue.length;xx++){
-						pO.objQueue[xx].queue = false;
+					console.log(pO.allAnims);
+					for(var xx=0;xx<pO.allAnims.length;xx++){
+						pO.allAnims[xx].queue = false;
 					}
 				}
 			}
