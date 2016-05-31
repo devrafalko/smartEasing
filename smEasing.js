@@ -3,29 +3,31 @@
 function smEasing(o,p,b){
 	this.coords = passVal(o.coords,p,0);
 	this.fps = passVal(o.fps,p,1);
+	this.time = passVal(o.time,p,2);
+	this.action = passVal(o.action,p,3);
 	this.start = o.start;
 	this.stop = o.stop;
-	this.time = passVal(o.time,p,2);
 	this.delay = o.delay;
 	this.onStart = o.onStart;
 	this.onStop = o.onStop;
-	this.action = passVal(o.action,p,3);
 	this.after = o.after;
 	this.iteration = 0;
 	this.duration = 0;
 	this.queue = false;
+	
 	setDefaults.call(this,defVals);
 	parseValues.call(this);
 	validateValues.call(this);
-
-	var pA = typeof b==="undefined"? []:b;
-	pA.push(this);
-	this.allAnims = pA;
 	
 	var passing = [this.coords,this.fps,this.time,this.action];
+	b = validMe.isEmpty(b)? []:b;
+	b.push(this);
+	
 	if(!validMe.isEmpty(this.after)){
-		this.nextAnimation = new smEasing(this.after,passing,pA);
-	}
+		this.amimations = new smEasing(this.after,passing,b);
+		} else {
+			this.amimations = b;
+			}
 
 	function passVal(p,a,v){
 		return validMe.isEmpty(p) ? validMe.isEmpty(a) ? p:a[v]:p;
@@ -38,7 +40,7 @@ smEasing.prototype.run = function(){
 		} else {
 			this.queue = true;
 			}
-			
+	
 	var pO = this,i=0;
 	var sI,sT;
 	var rV,aA;
@@ -95,13 +97,12 @@ smEasing.prototype.run = function(){
 			if(i>=hR){
 				clearInterval(sI);
 				pO.iteration = 0;
-				
-				if(typeof pO.nextAnimation !== "undefined"){
-					pO.nextAnimation.run();
+				console.log();
+				if(!validMe.isArray(pO.amimations)){
+					pO.amimations.run();
 				} else {
-					console.log(pO.allAnims);
-					for(var xx=0;xx<pO.allAnims.length;xx++){
-						pO.allAnims[xx].queue = false;
+					for(var xx=0;xx<pO.amimations.length;xx++){
+						pO.amimations[xx].queue = false;
 					}
 				}
 			}
