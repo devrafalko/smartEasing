@@ -43,9 +43,9 @@ smEasing.prototype.run = function(){
 	
 	var pO = this,i=0;
 	var sI,sT;
-	var rV,aA;
+	var aA;
+	var rV,rA = [];
 	var d,bX=[],bY=[],bXnew,bYnew,cA = [];
-	
 	if(validMe.isArray(this.coords)){
 		aA = this.coords.slice();
 	} else if(validMe.isString(this.coords)){
@@ -93,8 +93,16 @@ smEasing.prototype.run = function(){
 				cA = [];
 			}
 			
-			rV = pO.start+((pO.stop-pO.start)*bYnew[0]);
-			pO.action(rV);
+			if(validMe.isArray(pO.start)){
+				rA = [];
+				for (var xy=0;xy<pO.start.length;xy++){
+					rA.push(pO.start[xy]+((pO.stop[xy]-pO.start[xy])*bYnew[0]));
+				}
+				pO.action(rA);
+			} else {
+				rV = pO.start+((pO.stop-pO.start)*bYnew[0]);
+				pO.action(rV);
+			}
 			
 			if(i>=hR){
 				clearInterval(sI);
@@ -121,8 +129,8 @@ function setDefaults(def){
 
 function parseValues(){
 	this.coords = validMe.isArray(this.coords) ? parseMe.itemsToNumbers(this.coords).slice():this.coords;
-	this.start = parseMe.parseToNumber(this.start);
-	this.stop = parseMe.parseToNumber(this.stop);
+	this.start = validMe.isArray(this.start)? parseMe.itemsToNumbers(this.start):validMe.isNumber(this.start) ? parseMe.parseToNumber(this.start):this.start;
+	this.stop = validMe.isArray(this.stop)? parseMe.itemsToNumbers(this.stop):validMe.isNumber(this.stop) ? parseMe.parseToNumber(this.stop):this.stop;
 	this.fps = parseMe.parseToInteger(this.fps);
 	this.time = parseMe.parseToInteger(this.time);
 	this.time = validMe.isNumber(this.time)&&this.time<=0 ? 1:this.time;
@@ -153,8 +161,12 @@ function validateValues(){
 				if(!validMe.isNumber(f)) throw "Error: " + "The fps value for " + objName + " object must be an Integer."; 
 				if(f<1) throw "Error: " + "The fps value for " + objName + " object must be higher than 0"; 
 				if(f>75) throw "Error: " + "The fps value for " + objName + " object can be at most 75."; 
-				if(!validMe.isNumber(st)) throw "Error: " + "The start value for " + objName + " object must be a number."; 
-				if(!validMe.isNumber(sp)) throw "Error: " + "The stop value for " + objName + " object must be a number."; 
+				if(!(validMe.isNumber(st)||(validMe.isArray(st)&&st.length>0))) throw "Error: " + "The start value for " + objName + " object must be a number or array with at least one value."; 
+				if((validMe.isArray(st))&&(!validMe.areItemsNums(st))) throw "Error: " + "Every item of start array for " + objName + " object must be a number.";
+				if(!(validMe.isNumber(sp)||(validMe.isArray(sp)&&sp.length>0))) throw "Error: " + "The stop value for " + objName + " object must be a number or array with at least one value."; 
+				if((validMe.isNumber(sp)&&validMe.isArray(st))||(validMe.isNumber(st)&&validMe.isArray(sp))) throw "Error: " + "Both start and stop value for " + objName + " object must be of the same type."; 
+				if(validMe.isArray(st)&&validMe.isArray(sp)&&st.length!==sp.length) throw "Error: " + "Both start and stop value for " + objName + " object must containt equal number of values."; 
+				if((validMe.isArray(sp))&&(!validMe.areItemsNums(sp))) throw "Error: " + "Every item of stop array for " + objName + " object must be a number.";
 				if(st===sp) throw "Error: " + "The stop value for " + objName + " object must differ from start value.";
 				if(!validMe.isNumber(t)) throw "Error: " + "The time value for " + objName + " object must be an Integer."; 
 				if(!validMe.isNumber(d)) throw "Error: " + "The delay value for " + objName + " object must be an Integer."; 
