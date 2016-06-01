@@ -9,12 +9,12 @@ function smEasing(o,p,b){
 	this.stop = o.stop;
 	this.delay = o.delay;
 	this.onStart = o.onStart;
+	this.onDelay = o.onDelay;
 	this.onStop = o.onStop;
 	this.after = o.after;
 	this.iteration = 0;
 	this.duration = 0;
 	this.queue = false;
-	
 	setDefaults.call(this,defVals);
 	parseValues.call(this);
 	validateValues.call(this);
@@ -67,7 +67,9 @@ smEasing.prototype.run = function(){
 	var hR = Math.round((this.fps*this.time)/1000);
 	var nT = this.time/hR;
 	clearInterval(sI);
+	this.onStart();
 	sT = setTimeout(function(){
+		pO.onDelay();
 		sI = setInterval(function(){
 			i++;
 			pO.iteration = i;
@@ -97,7 +99,7 @@ smEasing.prototype.run = function(){
 			if(i>=hR){
 				clearInterval(sI);
 				pO.iteration = 0;
-				console.log();
+				pO.onStop();
 				if(!validMe.isArray(pO.amimations)){
 					pO.amimations.run();
 				} else {
@@ -137,6 +139,7 @@ function validateValues(){
 	var t = this.time;
 	var d = this.delay;
 	var oSt = this.onStart;
+	var oD = this.onDelay;
 	var oSp = this.onStop;
 	var ac = this.action;
 	var af = this.after;
@@ -156,6 +159,7 @@ function validateValues(){
 				if(!validMe.isNumber(t)) throw "Error: " + "The time value for " + objName + " object must be an Integer."; 
 				if(!validMe.isNumber(d)) throw "Error: " + "The delay value for " + objName + " object must be an Integer."; 
 				if(!(validMe.isFunction(oSt))) throw "Error: " + "The onStart property for " + objName + " object must be of type Function."; 
+				if(!(validMe.isFunction(oD))) throw "Error: " + "The onDelay property for " + objName + " object must be of type Function."; 
 				if(!(validMe.isFunction(oSp))) throw "Error: " + "The onStop property for " + objName + " object must be of type Function."; 
 				if(!validMe.isFunction(ac)) throw "Error: " + "The action property for " + objName + " object must be of type Function."; 
 				if(!(validMe.isObject(af)||validMe.isEmpty(af))) throw "Error: " + "The action property for " + objName + " object must be of type Object."; 
@@ -169,6 +173,7 @@ var defVals = {
 	delay:0,
 	action:function(){},
 	onStart:function(){},
+	onDelay:function(){},
 	onStop:function(){}
 };
 
