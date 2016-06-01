@@ -1,6 +1,10 @@
 /* global Function, easingModes */
 
 function smEasing(o,p,b){
+	b = validMe.isEmpty(b)? []:b;
+	b.push(this);
+	
+	this.basic = b[0];
 	this.coords = passVal(o.coords,p,0);
 	this.fps = passVal(o.fps,p,1);
 	this.time = passVal(o.time,p,2);
@@ -15,20 +19,14 @@ function smEasing(o,p,b){
 	this.iteration = 0;
 	this.duration = 0;
 	this.queue = false;
+	this.repetition = validMe.isEmpty(p) ? o.repetition:undefined;
+	
 	setDefaults.call(this,defVals);
 	parseValues.call(this);
 	validateValues.call(this);
 	
-	var passing = [this.coords,this.fps,this.time,this.action];
-	b = validMe.isEmpty(b)? []:b;
-	b.push(this);
+	this.amimations = (!validMe.isEmpty(this.after)) ? new smEasing(this.after,[this.coords,this.fps,this.time,this.action],b):b;
 	
-	if(!validMe.isEmpty(this.after)){
-		this.amimations = new smEasing(this.after,passing,b);
-		} else {
-			this.amimations = b;
-			}
-
 	function passVal(p,a,v){
 		return validMe.isEmpty(p) ? validMe.isEmpty(a) ? p:a[v]:p;
 	}
@@ -114,6 +112,11 @@ smEasing.prototype.run = function(){
 					for(var xx=0;xx<pO.amimations.length;xx++){
 						pO.amimations[xx].queue = false;
 					}
+					
+					pO.basic.repetition -= 1;
+					if(pO.basic.repetition!==0){
+						pO.basic.run();
+					};
 				}
 			}
 		},nT);
@@ -136,6 +139,8 @@ function parseValues(){
 	this.time = validMe.isNumber(this.time)&&this.time<=0 ? 1:this.time;
 	this.delay = parseMe.parseToInteger(this.delay);
 	this.delay = validMe.isNumber(this.delay)&&this.delay<=0 ? 0:this.delay;
+	this.repetition = parseMe.parseToInteger(this.repetition);
+	this.repetition = (validMe.isNumber(this.repetition)||this.repetition===Number.NEGATIVE_INFINITY)&&this.repetition<=0 ? 1:this.repetition;
 }
 
 function validateValues(){
@@ -151,6 +156,8 @@ function validateValues(){
 	var oSp = this.onStop;
 	var ac = this.action;
 	var af = this.after;
+	var r = this.repetition;
+	
 			try{
 				if(!(validMe.isArray(c)||validMe.isString(c))) throw "Error: " + "The coords value for " + objName + " object must be of type String or Array.";
 				if((validMe.isArray(c))&&(c.length<4)) throw "Error: " + "The coordinates array for " + objName + " object must containt at least 4 values.";
@@ -168,15 +175,16 @@ function validateValues(){
 				if(validMe.isArray(st)&&validMe.isArray(sp)&&st.length!==sp.length) throw "Error: " + "Both start and stop value for " + objName + " object must containt equal number of values."; 
 				if((validMe.isArray(sp))&&(!validMe.areItemsNums(sp))) throw "Error: " + "Every item of stop array for " + objName + " object must be a number.";
 				if(st===sp) throw "Error: " + "The stop value for " + objName + " object must differ from start value.";
-				if(!validMe.isNumber(t)) throw "Error: " + "The time value for " + objName + " object must be an Integer."; 
-				if(!validMe.isNumber(d)) throw "Error: " + "The delay value for " + objName + " object must be an Integer."; 
+				if(!validMe.isNumber(t)) throw "Error: " + "The time value for " + objName + " object must be an integer."; 
+				if(!validMe.isNumber(d)) throw "Error: " + "The delay value for " + objName + " object must be an integer."; 
+				if((!validMe.isNumber(r))&&(!validMe.isEmpty(r))&&(r!==Infinity)) throw "Error: " + "The repetition value for " + objName + " object must be an integer or Infinity."; 
 				if(!(validMe.isFunction(oSt))) throw "Error: " + "The onStart property for " + objName + " object must be of type Function."; 
 				if(!(validMe.isFunction(oD))) throw "Error: " + "The onDelay property for " + objName + " object must be of type Function."; 
 				if(!(validMe.isFunction(oSp))) throw "Error: " + "The onStop property for " + objName + " object must be of type Function."; 
 				if(!validMe.isFunction(ac)) throw "Error: " + "The action property for " + objName + " object must be of type Function."; 
 				if(!(validMe.isObject(af)||validMe.isEmpty(af))) throw "Error: " + "The action property for " + objName + " object must be of type Object."; 
+
 	} catch(err) {throw err;}
-	
 };
 
 var defVals = {
@@ -239,3 +247,5 @@ var validMe = {
 		return (obj.map(toLower).indexOf(item.toLowerCase()))===-1 ? false:true;
 	}
 };
+
+
