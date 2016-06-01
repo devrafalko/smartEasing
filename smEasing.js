@@ -13,30 +13,25 @@ function smEasing(o,p,b){
 	this.stop = o.stop;
 	this.delay = o.delay;
 	this.onStart = o.onStart;
-	this.onDelay = o.onDelay;
 	this.onStop = o.onStop;
+	this.onDelay = o.onDelay;
 	this.after = o.after;
-	this.iteration = 0;
-	this.duration = 0;
-	this.queue = false;
-	this.repetition = validMe.isEmpty(p) ? o.repetition:undefined;
-	
+	this.params = [0,0,false];	//iteration,duration,queue
+	if(b.length===1) this.repetition = validMe.isEmpty(o.repetition)? 1:o.repetition;
 	setDefaults.call(this,defVals);
 	parseValues.call(this);
 	validateValues.call(this);
-	
 	this.amimations = (!validMe.isEmpty(this.after)) ? new smEasing(this.after,[this.coords,this.fps,this.time,this.action],b):b;
-	
 	function passVal(p,a,v){
 		return validMe.isEmpty(p) ? validMe.isEmpty(a) ? p:a[v]:p;
 	}
 }
 
 smEasing.prototype.run = function(){
-	if(this.queue){
+	if(this.params[2]){
 		return;
 		} else {
-			this.queue = true;
+			this.params[2] = true;
 			}
 	
 	var pO = this,i=0;
@@ -70,8 +65,8 @@ smEasing.prototype.run = function(){
 		pO.onDelay();
 		sI = setInterval(function(){
 			i++;
-			pO.iteration = i;
-			pO.duration = parseFloat(((1/(Math.round((pO.fps*pO.time)/1000)))*pO.iteration).toFixed(2));
+			pO.params[0] = i;
+			pO.params[1] = parseFloat(((1/(Math.round((pO.fps*pO.time)/1000)))*pO.params[0]).toFixed(2));
 			d = (1/hR)*i;
 			
 			bXnew = bX.slice();
@@ -101,22 +96,23 @@ smEasing.prototype.run = function(){
 				rV = pO.start+((pO.stop-pO.start)*bYnew[0]);
 				pO.action(rV);
 			}
-			
 			if(i>=hR){
 				clearInterval(sI);
-				pO.iteration = 0;
+				pO.params[0] = 0;
 				pO.onStop();
 				if(!validMe.isArray(pO.amimations)){
 					pO.amimations.run();
 				} else {
 					for(var xx=0;xx<pO.amimations.length;xx++){
-						pO.amimations[xx].queue = false;
+						pO.amimations[xx].params[2] = false;
 					}
-					
-					pO.basic.repetition -= 1;
-					if(pO.basic.repetition!==0){
+					console.log(pO.basic.repetition);
+					if(pO.basic.repetition[0]>1){
+						pO.basic.repetition[0] -= 1;
 						pO.basic.run();
-					};
+					} else {
+						pO.basic.repetition[0] = pO.basic.repetition[1];
+					}
 				}
 			}
 		},nT);
@@ -139,8 +135,11 @@ function parseValues(){
 	this.time = validMe.isNumber(this.time)&&this.time<=0 ? 1:this.time;
 	this.delay = parseMe.parseToInteger(this.delay);
 	this.delay = validMe.isNumber(this.delay)&&this.delay<=0 ? 0:this.delay;
-	this.repetition = parseMe.parseToInteger(this.repetition);
-	this.repetition = (validMe.isNumber(this.repetition)||this.repetition===Number.NEGATIVE_INFINITY)&&this.repetition<=0 ? 1:this.repetition;
+	if(!validMe.isEmpty(this.repetition)){
+		this.repetition = parseMe.parseToInteger(this.repetition);
+		this.repetition = (validMe.isNumber(this.repetition)||this.repetition===Number.NEGATIVE_INFINITY)&&this.repetition<=0 ? 1:this.repetition;
+		this.repetition = [this.repetition,this.repetition];
+	}
 }
 
 function validateValues(){
@@ -157,7 +156,6 @@ function validateValues(){
 	var ac = this.action;
 	var af = this.after;
 	var r = this.repetition;
-	
 			try{
 				if(!(validMe.isArray(c)||validMe.isString(c))) throw "Error: " + "The coords value for " + objName + " object must be of type String or Array.";
 				if((validMe.isArray(c))&&(c.length<4)) throw "Error: " + "The coordinates array for " + objName + " object must containt at least 4 values.";
@@ -177,7 +175,7 @@ function validateValues(){
 				if(st===sp) throw "Error: " + "The stop value for " + objName + " object must differ from start value.";
 				if(!validMe.isNumber(t)) throw "Error: " + "The time value for " + objName + " object must be an integer."; 
 				if(!validMe.isNumber(d)) throw "Error: " + "The delay value for " + objName + " object must be an integer."; 
-				if((!validMe.isNumber(r))&&(!validMe.isEmpty(r))&&(r!==Infinity)) throw "Error: " + "The repetition value for " + objName + " object must be an integer or Infinity."; 
+				if(!validMe.isEmpty(r)&&(!(validMe.isNumber(r[0])||r[0]===Number.POSITIVE_INFINITY))) throw "Error: " + "The repetition value for " + objName + " object must be a positive integer or Infinity."; 
 				if(!(validMe.isFunction(oSt))) throw "Error: " + "The onStart property for " + objName + " object must be of type Function."; 
 				if(!(validMe.isFunction(oD))) throw "Error: " + "The onDelay property for " + objName + " object must be of type Function."; 
 				if(!(validMe.isFunction(oSp))) throw "Error: " + "The onStop property for " + objName + " object must be of type Function."; 
